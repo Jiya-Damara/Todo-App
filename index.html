@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced To-Do List</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #3a0ca3;
+            --secondary-color: #4361ee;
+            --accent-color: #7209b7;
+            --background-color: #f8f9fa;
+            --text-color: #212529;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--text-color);
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: var(--primary-color);
+            padding: 15px 0;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+
+        nav a:hover {
+            color: var(--accent-color);
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 600px;
+            margin-top: 70px;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+
+        .input-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .input-group input {
+            flex: 1 1 calc(50% - 5px);
+            min-width: 120px;
+        }
+
+        input[type="text"], input[type="date"], input[type="time"] {
+            padding: 12px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="text"]:focus, input[type="date"]:focus, input[type="time"]:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+        }
+
+        button {
+            background: var(--secondary-color);
+            border: none;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.1s ease;
+            font-size: 1em;
+            font-weight: bold;
+            width: 100%;
+        }
+
+        button:hover {
+            background: var(--accent-color);
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 10px;
+            margin-top: 20px;
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+        }
+
+        td {
+            background-color: #f8f9fa;
+            padding: 12px;
+            border-top: 1px solid #dee2e6;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        tr td:first-child {
+            border-left: 1px solid #dee2e6;
+            border-top-left-radius: 5px;
+            border-bottom-left-radius: 5px;
+        }
+
+        tr td:last-child {
+            border-right: 1px solid #dee2e6;
+            border-top-right-radius: 5px;
+            border-bottom-right-radius: 5px;
+        }
+
+        .delete-btn {
+            background: #dc3545;
+            padding: 8px 12px;
+            font-size: 0.9em;
+        }
+
+        .delete-btn:hover {
+            background: #c82333;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        tr {
+            animation: fadeIn 0.3s ease;
+        }
+
+        @media (max-width: 600px) {
+            .input-group input {
+                flex: 1 1 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="#"><i class="fas fa-home"></i> Home</a>
+        <a href="#"><i class="fas fa-info-circle"></i> About</a>
+        <a href="#"><i class="fas fa-envelope"></i> Contact</a>
+    </nav>
+    <div class="container">
+        <h1><i class="fas fa-tasks"></i> Enhanced To-Do List</h1>
+        <div class="input-group">
+            <input type="text" id="taskInput" placeholder="Add a new task...">
+            <input type="text" id="personInput" placeholder="Assigned to...">
+            <input type="date" id="dueDateInput">
+            <input type="time" id="dueTimeInput">
+        </div>
+        <button onclick="addTask()"><i class="fas fa-plus"></i> Add Task</button>
+        <table>
+            <thead>
+                <tr>
+                    <th>Task</th>
+                    <th>Assigned To</th>
+                    <th>Due Date</th>
+                    <th>Due Time</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="taskList"></tbody>
+        </table>
+    </div>
+
+    <script>
+        // The JavaScript remains the same as in the previous version
+        document.addEventListener('DOMContentLoaded', loadTasks);
+
+        function loadTasks() {
+            let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            const taskList = document.getElementById('taskList');
+            taskList.innerHTML = '';
+            tasks.forEach(task => addTaskToDOM(task));
+        }
+
+        function addTask() {
+            const taskInput = document.getElementById('taskInput');
+            const personInput = document.getElementById('personInput');
+            const dueDateInput = document.getElementById('dueDateInput');
+            const dueTimeInput = document.getElementById('dueTimeInput');
+            const task = taskInput.value.trim();
+            const person = personInput.value.trim();
+            const dueDate = dueDateInput.value;
+            const dueTime = dueTimeInput.value;
+
+            if (task && person && dueDate && dueTime) {
+                const taskObj = { id: Date.now(), task, person, dueDate, dueTime };
+                addTaskToDOM(taskObj);
+                saveTask(taskObj);
+                resetInputs();
+            } else {
+                alert('Please fill in all fields');
+            }
+        }
+
+        function addTaskToDOM(taskObj) {
+            const taskList = document.getElementById('taskList');
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${taskObj.task}</td>
+                <td>${taskObj.person}</td>
+                <td>${formatDate(taskObj.dueDate)}</td>
+                <td>${taskObj.dueTime}</td>
+                <td><button class="delete-btn" onclick="removeTask(${taskObj.id})"><i class="fas fa-trash"></i></button></td>
+            `;
+            taskList.appendChild(tr);
+        }
+
+        function saveTask(taskObj) {
+            let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            tasks.push(taskObj);
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+        }
+
+        function removeTask(id) {
+            let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            tasks = tasks.filter(t => t.id !== id);
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            loadTasks();
+        }
+
+        function resetInputs() {
+            document.getElementById('taskInput').value = '';
+            document.getElementById('personInput').value = '';
+            document.getElementById('dueDateInput').value = '';
+            document.getElementById('dueTimeInput').value = '';
+        }
+
+        function formatDate(dateString) {
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString(undefined, options);
+        }
+
+        // Event listeners for input fields
+        ['taskInput', 'personInput', 'dueDateInput', 'dueTimeInput'].forEach(id => {
+            document.getElementById(id).addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    addTask();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
